@@ -4,6 +4,8 @@ import static edu.iis.mto.testreactor.dishwasher.Status.DOOR_OPEN;
 import static edu.iis.mto.testreactor.dishwasher.Status.SUCCESS;
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
+
 import edu.iis.mto.testreactor.dishwasher.engine.Engine;
 import edu.iis.mto.testreactor.dishwasher.engine.EngineException;
 import edu.iis.mto.testreactor.dishwasher.pump.PumpException;
@@ -44,6 +46,7 @@ public class DishWasher {
 
     private RunResult run(WashingProgram program, FillLevel fillLevel) {
         try {
+            door.lock();
             if (!program.equals(WashingProgram.RINSE)) {
                 runProgram(program, fillLevel);
             }
@@ -62,8 +65,12 @@ public class DishWasher {
 
     private void runProgram(WashingProgram program, FillLevel fillLevel) throws EngineException, PumpException {
         waterPump.pour(fillLevel);
-        engine.runProgram(program);
+        engine.runProgram(programCodes(program));
         waterPump.drain();
+    }
+
+    private List<Integer> programCodes(WashingProgram program) {
+        return List.of(program.ordinal(), program.getTimeInMinutes());
     }
 
     private RunResult success(WashingProgram program) {

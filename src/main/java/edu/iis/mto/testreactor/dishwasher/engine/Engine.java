@@ -1,9 +1,9 @@
 package edu.iis.mto.testreactor.dishwasher.engine;
 
-import edu.iis.mto.testreactor.dishwasher.WashingProgram;
+import java.util.List;
 
 public interface Engine {
 
-    void runProgram(WashingProgram program) throws EngineException;
+    void runProgram(List<Integer> codes) throws EngineException;
 
 }

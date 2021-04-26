@@ -6,4 +6,6 @@ public interface Door {
 
     void unlock();
 
+    void lock();
+
 }
