@@ -44,4 +44,10 @@ class DishWasherTest {
         assertEquals("dirtFilter == null", dirtFilterException.getMessage());
         assertEquals("door == null", doorException.getMessage());
     }
+
+    @Test
+    void startNullParameter() {
+        NullPointerException result = assertThrows(NullPointerException.class, () -> dishWasher.start(null));
+        assertEquals("program == null", result.getMessage());
+    }
 }
