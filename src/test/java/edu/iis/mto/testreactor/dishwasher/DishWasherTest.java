@@ -6,12 +6,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.internal.matchers.Null;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DishWasherTest {
@@ -22,6 +21,13 @@ class DishWasherTest {
     @Mock Door door;
 
     private DishWasher dishWasher;
+    private final FillLevel irrelevantFillLevel = FillLevel.HALF;
+    private final WashingProgram irrelevantProgram = WashingProgram.ECO;
+    private final ProgramConfiguration irrelevantConfig = ProgramConfiguration.builder()
+            .withTabletsUsed(true)
+            .withProgram(irrelevantProgram)
+            .withFillLevel(irrelevantFillLevel)
+            .build();
 
     @BeforeEach
     void setUp() {
@@ -49,5 +55,13 @@ class DishWasherTest {
     void startNullParameter() {
         NullPointerException result = assertThrows(NullPointerException.class, () -> dishWasher.start(null));
         assertEquals("program == null", result.getMessage());
+    }
+
+    @Test
+    void doorClosed() {
+        when(door.closed()).thenReturn(false);
+        RunResult result = dishWasher.start(irrelevantConfig);
+        assertEquals(Status.DOOR_OPEN, result.getStatus());
+        assertEquals(0, result.getRunMinutes());
     }
 }
