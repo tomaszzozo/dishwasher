@@ -65,4 +65,37 @@ class DishWasherTest {
         assertEquals(0, result.getRunMinutes());
     }
 
+    @Test
+    void dirtyFilter() {
+        when(dirtFilter.capacity()).thenReturn(DishWasher.MAXIMAL_FILTER_CAPACITY-0.0001);
+        when(door.closed()).thenReturn(true);
+
+        RunResult result = dishWasher.start(irrelevantConfig);
+        assertEquals(Status.ERROR_FILTER, result.getStatus());
+        assertEquals(0, result.getRunMinutes());
+    }
+
+    @Test
+    void dirtFilterWithCapacityEqualToMax() {
+        when(dirtFilter.capacity()).thenReturn(DishWasher.MAXIMAL_FILTER_CAPACITY);
+        when(door.closed()).thenReturn(true);
+
+        RunResult result = dishWasher.start(irrelevantConfig);
+        assertEquals(Status.ERROR_FILTER, result.getStatus());
+        assertEquals(0, result.getRunMinutes());
+    }
+
+    @Test
+    void dirtyFilterButNoWashingTabletsUsed() {
+        when(door.closed()).thenReturn(true);
+
+        ProgramConfiguration noTabletsProgram = ProgramConfiguration.builder()
+                .withProgram(irrelevantProgram)
+                .withTabletsUsed(false)
+                .withFillLevel(irrelevantFillLevel)
+                .build();
+        RunResult result = dishWasher.start(noTabletsProgram);
+        assertEquals(Status.SUCCESS, result.getStatus());
+    }
+
 }
