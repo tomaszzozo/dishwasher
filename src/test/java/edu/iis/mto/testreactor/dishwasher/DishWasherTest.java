@@ -58,10 +58,11 @@ class DishWasherTest {
     }
 
     @Test
-    void doorClosed() {
+    void doorOpen() {
         when(door.closed()).thenReturn(false);
         RunResult result = dishWasher.start(irrelevantConfig);
         assertEquals(Status.DOOR_OPEN, result.getStatus());
         assertEquals(0, result.getRunMinutes());
     }
+
 }
