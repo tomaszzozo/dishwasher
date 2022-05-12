@@ -1,6 +1,8 @@
 package edu.iis.mto.testreactor.dishwasher;
 
 import edu.iis.mto.testreactor.dishwasher.engine.Engine;
+import edu.iis.mto.testreactor.dishwasher.engine.EngineException;
+import edu.iis.mto.testreactor.dishwasher.pump.PumpException;
 import edu.iis.mto.testreactor.dishwasher.pump.WaterPump;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +88,7 @@ class DishWasherTest {
     }
 
     @Test
-    void dirtyFilterButNoWashingTabletsUsed() {
+    void noWashingTabletsUsed() {
         when(door.closed()).thenReturn(true);
 
         ProgramConfiguration noTabletsProgram = ProgramConfiguration.builder()
@@ -98,4 +100,28 @@ class DishWasherTest {
         assertEquals(Status.SUCCESS, result.getStatus());
     }
 
+    @Test
+    void engineException() throws EngineException {
+        when(door.closed()).thenReturn(true);
+        when(dirtFilter.capacity()).thenReturn(DishWasher.MAXIMAL_FILTER_CAPACITY+1);
+
+        doThrow(EngineException.class).when(engine).runProgram(anyList());
+        RunResult result = dishWasher.start(irrelevantConfig);
+        assertEquals(Status.ERROR_PROGRAM, result.getStatus());
+    }
+
+    @Test
+    void pumpException() throws PumpException {
+        when(door.closed()).thenReturn(true);
+        when(dirtFilter.capacity()).thenReturn(DishWasher.MAXIMAL_FILTER_CAPACITY+1);
+
+        doThrow(PumpException.class).when(waterPump).pour(any(FillLevel.class));
+        RunResult result = dishWasher.start(irrelevantConfig);
+        assertEquals(Status.ERROR_PUMP, result.getStatus());
+
+        doNothing().when(waterPump).pour(any(FillLevel.class));
+        doThrow(PumpException.class).when(waterPump).drain();
+        result = dishWasher.start(irrelevantConfig);
+        assertEquals(Status.ERROR_PUMP, result.getStatus());
+    }
 }
